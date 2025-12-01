@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
+    console.log(error)
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },

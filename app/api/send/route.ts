@@ -8,7 +8,6 @@ export async function POST(request: Request) {
     const body = await request.json(); // 👈 parse incoming JSON
     const { token, title, message_body } = body;
 
-    console.log(body)
 
     // ✅ validation
     if (!token || !title || !message_body) {
@@ -35,7 +34,7 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error sending message:', error);
+    console.log(error);
     throw new Error('Failed to send message');
   }
      
@@ -44,6 +43,7 @@ export async function POST(request: Request) {
 
    
   } catch (error) {
+    console.log(error)
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },

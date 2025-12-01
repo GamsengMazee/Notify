@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         { status: 208 }
       );
     } else if (check_id && fcm_token !== check_id.fcm_token) {
-      const newData = await deviceSchema.findByIdAndUpdate(
+        await deviceSchema.findByIdAndUpdate(
         { _id: check_id._id },
         {
           device_name,
@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    console.log(error)
     return NextResponse.json({ message: "Server Error" }, { status: 500 });
   }
 }

@@ -77,6 +77,7 @@ function SendNotification() {
         }
       } catch (error) {
         alert("Failed to send Notifications");
+        console.log(error)
       }
     }else {
        try {
@@ -100,6 +101,7 @@ function SendNotification() {
         }
       } catch (error) {
         alert("Failed to send Notifications");
+        console.log(error)
       }
     }
   };

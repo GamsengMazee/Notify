@@ -2,7 +2,7 @@ import Register from "../../../models/register_schema";
 import db from "../../../utils/db";
 import { cookies } from "next/headers";
 
-const jwt = require("jsonwebtoken");
+ const jwt = require("jsonwebtoken");
 
 export async function GET() {
     const cookieStore = await cookies();

@@ -37,12 +37,13 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error sending message:', error);
+    console.log(error);
     throw new Error('Failed to send message');
   }
      
    
   } catch (error) {
+    console.log(error)
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },

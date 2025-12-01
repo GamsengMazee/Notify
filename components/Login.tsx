@@ -31,6 +31,7 @@ export default function Login({checkLogIn}:loginType) {
         }
       } catch (error) {
         alert("Unable to Login!");
+        console.log(error)
       }
   };
 

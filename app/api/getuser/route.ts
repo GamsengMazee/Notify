@@ -1,10 +1,10 @@
 import deviceSchema from "@/models/device_info";
 import db from "@/utils/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
  
     await db();
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ result }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ message: "Server Error" }, { status: 500 })
+    return NextResponse.json({ message: "Server Error", error }, { status: 500 })
   }
 
 }
