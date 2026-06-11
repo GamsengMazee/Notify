@@ -13,3 +13,10 @@ export type dbData = {
     device_info: string,
     __v?: number
 }
+
+export type recentNoficationType = {
+    _id: number,
+    title: string,
+    message_body: string,
+    timestamp: string
+}

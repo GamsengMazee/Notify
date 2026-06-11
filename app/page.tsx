@@ -1,16 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Bell, Send, Users, TrendingUp, Settings, Home, History } from "lucide-react";
-import { previousNotifications } from "@/utils/data";
+import { useEffect, useState } from "react";
+import {
+  Bell,
+  Send,
+  Users,
+  TrendingUp,
+  Settings,
+  Home,
+  History,
+} from "lucide-react";
+
 import SendNotification from "@/components/SendNotification";
 import Login from "@/components/Login";
-
+import { recentNoficationType } from "@/utils/types";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [recentNotifi, setRecentNotifi] = useState<recentNoficationType[]>([])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -26,7 +35,7 @@ export default function Dashboard() {
   };
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("en-US", {
+    new Date(date).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -40,13 +49,9 @@ export default function Dashboard() {
     { title: "Click Rate", value: "18.5%", icon: TrendingUp, color: "text-orange-600" },
   ];
 
-  useEffect(() => {
-     authenticate()
-  },[])
-
-  //check if user is already logged in
-  const authenticate = useCallback( async() => {
-     try {
+  // AUTH CHECK
+  const authenticate = async () => {
+    try {
       const response = await fetch("/api/auth0", {
         method: "GET",
         headers: {
@@ -54,25 +59,61 @@ export default function Dashboard() {
         },
       });
 
-      if (response.status === 201) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
+      setIsLoggedIn(response.ok);
+    } catch (error) {
+      console.log("Auth error:", error);
+      setIsLoggedIn(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // RECENT NOTIFICATIONS
+  const getRecentNotification = async () => {
+    try {
+      const response = await fetch("/api/recent", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('my data ------>',data.data)
+        setRecentNotifi(data.data)
+        
+        // console.log("Recent notifications:", data.data);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Recent notification error:", error);
     }
-  }, [])
+  };
 
-  //function to trigger login state
-  function checkLogIn(){
-    setIsLoggedIn(true)
+  useEffect(() => {
+    authenticate();
+    getRecentNotification();
+    console.log(recentNotifi)
+  }, []);
+
+  // called after login success
+  function checkLogIn() {
+    authenticate();
   }
 
-  if(!isLoggedIn){
-    return <Login checkLogIn = {checkLogIn}/>
-  }else {
-       return (
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return <Login checkLogIn={checkLogIn} />;
+  }
+
+  return (
     <div className="min-h-screen flex bg-white">
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-200 p-6">
@@ -109,7 +150,7 @@ export default function Dashboard() {
         </nav>
       </aside>
 
-      {/* Main */}
+      {/* MAIN */}
       <main className="flex-1 p-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {activeTab === "dashboard" && "Dashboard Overview"}
@@ -117,17 +158,19 @@ export default function Dashboard() {
           {activeTab === "history" && "Notification History"}
           {activeTab === "settings" && "Settings"}
         </h2>
+
         <p className="text-gray-500 mb-8">
-          {activeTab === "dashboard" && "Monitor your notification performance"}
+          {activeTab === "dashboard" &&
+            "Monitor your notification performance"}
           {activeTab === "send" && "Create and send push notifications"}
           {activeTab === "history" && "View your past campaigns"}
           {activeTab === "settings" && "Configure FCM settings"}
         </p>
 
-        {/* Dashboard */}
+        {/* DASHBOARD */}
         {activeTab === "dashboard" && (
           <div className="space-y-8">
-            {/* Stats */}
+            {/* STATS */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((s, i) => (
                 <div
@@ -149,34 +192,36 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Recent Notifications */}
+            {/* RECENT */}
             <div className="p-6 bg-white rounded-xl shadow border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Recent Notifications
               </h3>
+
               <div className="space-y-4">
-                {previousNotifications.slice(0, 3).map((n) => (
+                {recentNotifi.slice(0, 4).map((n) => (
                   <div
-                    key={n.id}
+                    key={n._id}
                     className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
                   >
                     <div>
-                      <h4 className="font-medium text-gray-900">{n.title}</h4>
-                      <p className="text-sm text-gray-600">{n.body}</p>
+                      <h4 className="font-medium text-amber-600">{n.title}</h4>
+                      <p className="text-sm text-gray-600">{n.message_body}</p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {formatDate(n.sent)}
+                        {formatDate(n.timestamp)}
                       </p>
                     </div>
+
                     <div className="text-right">
                       <span
                         className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
-                          n.status
+                          "delivered"
                         )}`}
                       >
-                        {n.status}
+                        delivered
                       </span>
                       <p className="text-sm text-gray-600 mt-1">
-                        {n.delivered.toLocaleString()} delivered
+                        3944 delivered
                       </p>
                     </div>
                   </div>
@@ -186,86 +231,68 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Send Notification */}
-        {activeTab === "send" && (
-          <SendNotification />
-        )}
+        {/* SEND */}
+        {activeTab === "send" && <SendNotification />}
 
-        {/* History */}
+        {/* HISTORY */}
         {activeTab === "history" && (
           <div className="space-y-6">
-            {previousNotifications.map((n) => (
+            {recentNotifi.map((n) => (
               <div
-                key={n.id}
+                key={n._id}
                 className="p-6 bg-white rounded-xl shadow border border-gray-100"
               >
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold text-gray-900">{n.title}</h4>
+                      <h4 className="font-semibold text-gray-900">
+                        {n.title}
+                      </h4>
                       <span
                         className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
-                          n.status
+                         "delivered"
                         )}`}
                       >
-                        {n.status}
+                        delivered
                       </span>
                     </div>
-                    <p className="text-gray-600">{n.body}</p>
+
+                    <p className="text-gray-600">{n.message_body}</p>
+
                     <p className="text-sm text-gray-500 mt-2">
-                      Sent: {formatDate(n.sent)} • Target: {n.target}
+                      Sent: {formatDate(n.timestamp)} • Target: all
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">Delivered</p>
-                    <p className="font-semibold text-green-600">
-                      {n.delivered.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">Clicked</p>
-                    <p className="font-semibold text-blue-600">
-                      {n.clicked.toLocaleString()}
-                    </p>
-                  </div>
+
+                  
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Settings */}
+        {/* SETTINGS */}
         {activeTab === "settings" && (
           <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow border border-gray-100 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Server Key
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••••"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Project ID
-              </label>
-              <input
-                type="text"
-                placeholder="your-firebase-project-id"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Web API Key
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••••"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-            <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+            <input
+              type="password"
+              placeholder="Server Key"
+              className="w-full border px-3 py-2 rounded-lg"
+            />
+
+            <input
+              type="text"
+              placeholder="Project ID"
+              className="w-full border px-3 py-2 rounded-lg"
+            />
+
+            <input
+              type="password"
+              placeholder="Web API Key"
+              className="w-full border px-3 py-2 rounded-lg"
+            />
+
+            <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
               Save Configuration
             </button>
           </div>
@@ -273,7 +300,4 @@ export default function Dashboard() {
       </main>
     </div>
   );
-  }
-
-  
 }
