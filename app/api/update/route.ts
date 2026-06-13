@@ -1,43 +1,33 @@
 // src/app/api/decrypt/route.ts
-
-import notifiSchema from "@/models/notification_schema";
-import admin from "@/utils/admin";
+import updateSchema from "@/models/update_schema";
 import db from "@/utils/db";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json(); // 👈 parse incoming JSON
-    const { token, title, message_body } = body;
+    const { secret_key, version_name, version_number } = body;
+
+    console.log(secret_key, "    " + version_name,   "    " + version_number   )
 
     // ✅ validation
-    if (!token || !title || !message_body) {
+    if (!secret_key || !version_name || !version_number) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
-
-    const message = {
-      notification: {
-        title,
-        body: message_body,
-      },
-      token: token, // FCM token of the target Android device
-    };
-
     try {
-      // const response = await admin.messaging().send(message);
-      // console.log("Successfully sent message:", response);
+      const response = "App Version Update Request Sent Successfully";
 
-      const response = "message delivered"
+      if(secret_key !== "1960") return;
 
       //store data to db
       await db();
-      const db_data = await new notifiSchema({
-        title,
-        message_body,
+      const db_data = await  updateSchema.findByIdAndUpdate("6a2d4a65991d085d4a245daf", {
+        version_name,
+        version_number
       });
-        await db_data.save();
+      await db_data.save();
 
       return new Response(JSON.stringify({ success: true, response }), {
         status: 200,

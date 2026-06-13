@@ -14,6 +14,7 @@ import {
 import SendNotification from "@/components/SendNotification";
 import Login from "@/components/Login";
 import { recentNoficationType } from "@/utils/types";
+import Update from "@/components/Update";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -164,7 +165,7 @@ export default function Dashboard() {
             "Monitor your notification performance"}
           {activeTab === "send" && "Create and send push notifications"}
           {activeTab === "history" && "View your past campaigns"}
-          {activeTab === "settings" && "Configure FCM settings"}
+          {activeTab === "settings" && "Send App update to users"}
         </p>
 
         {/* DASHBOARD */}
@@ -272,31 +273,7 @@ export default function Dashboard() {
         )}
 
         {/* SETTINGS */}
-        {activeTab === "settings" && (
-          <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow border border-gray-100 space-y-4">
-            <input
-              type="password"
-              placeholder="Server Key"
-              className="w-full border px-3 py-2 rounded-lg"
-            />
-
-            <input
-              type="text"
-              placeholder="Project ID"
-              className="w-full border px-3 py-2 rounded-lg"
-            />
-
-            <input
-              type="password"
-              placeholder="Web API Key"
-              className="w-full border px-3 py-2 rounded-lg"
-            />
-
-            <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
-              Save Configuration
-            </button>
-          </div>
-        )}
+        {activeTab === "settings" && <Update />}
       </main>
     </div>
   );
