@@ -26,18 +26,18 @@ export async function POST(request: Request) {
     };
 
     try {
-      // const response = await admin.messaging().send(message);
-      // console.log("Successfully sent message:", response);
+      const response = await admin.messaging().send(message);
+      console.log("Successfully sent message:", response);
 
-      const response = "message delivered"
+      // const response = "message delivered"
 
       //store data to db
-      await db();
-      const db_data = await new notifiSchema({
-        title,
-        message_body,
-      });
-        await db_data.save();
+      // await db();
+      // const db_data = await new notifiSchema({
+      //   title,
+      //   message_body,
+      // });
+      //   await db_data.save();
 
       return new Response(JSON.stringify({ success: true, response }), {
         status: 200,
