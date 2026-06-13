@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     try {
       const response = "App Version Update Request Sent Successfully";
 
-      if(secret_key !== "1960") return;
+      if(secret_key !== "1960") return
 
       //store data to db
       await db();
