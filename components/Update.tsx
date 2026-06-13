@@ -91,7 +91,7 @@ function Update() {
     </div>
 
     <p className="mt-4 text-3xl font-extrabold text-blue-600">
-      {currentVersion.verNum}
+      {currentVersion.verNum.toFixed(1)}
     </p>
   </div>
 
